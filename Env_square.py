@@ -39,7 +39,7 @@ class Envsquare(object):
     def reset(self):
         self.occupancy = self.raw_occupancy.copy()
 
-        self.agt1_pos = [int((self.map_size - 1) / 2), 1]
+        self.agt1_pos = [int((self.map_size - 1) / 2 -3), 8]    # 智能体起始位置
         self.goal1_pos = [int((self.map_size - 1) / 2), self.map_size - 2]
         self.occupancy[self.agt1_pos[0]][self.agt1_pos[1]] = 1
 
