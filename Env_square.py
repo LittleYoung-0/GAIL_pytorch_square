@@ -15,6 +15,7 @@ class Envsquare(object):
             self.raw_occupancy[self.map_size - 1][i] = 1
             self.raw_occupancy[i][0] = 1
             self.raw_occupancy[i][self.map_size - 1] = 1
+
         # 障碍是按照16 * 16的地图尺寸设计的
         # 中间的障碍
         self.raw_occupancy[0:4, int((self.map_size - 1) / 2)] = 1
@@ -33,15 +34,43 @@ class Envsquare(object):
         self.occupancy = self.raw_occupancy.copy()
 
         self.agt1_pos = [int((self.map_size - 1) / 2), 1]
-        self.goal1_pos = [int((self.map_size - 1) / 2), self.map_size - 2]
+        self.goal1_pos_x = int((self.map_size - 1) / 2)
+        self.goal1_pos_y = self.map_size - 2
+        self.goal1_pos = [self.goal1_pos_x, self.goal1_pos_y]
         self.occupancy[self.agt1_pos[0]][self.agt1_pos[1]] = 1
 
     def reset(self):
         self.occupancy = self.raw_occupancy.copy()
-
-        self.agt1_pos = [int((self.map_size - 1) / 2 -3), 8]    # 智能体起始位置
-        self.goal1_pos = [int((self.map_size - 1) / 2), self.map_size - 2]
+        # 刷新环境，让智能体回到初始位置，这里的位置不是随机的
+        # self.agt1_pos = [int((self.map_size - 1) / 2), 1]
+        self.agt1_pos = [int((self.map_size - 1) / 2 +5), 8]
+        self.goal1_pos = [self.goal1_pos_x, self.goal1_pos_y]
         self.occupancy[self.agt1_pos[0]][self.agt1_pos[1]] = 1
+
+    def random_reset(self):
+        self.occupancy = self.raw_occupancy.copy()
+        # 环境更新的时候，随机初始化智能体位置
+        # 随机生成智能体横纵位置
+        # 判断随机位置有没有障碍物（且保证不是目标点），有的话重新生成
+        # 用flag表示有没有障碍物，1表示有障碍物
+        flag = 1
+        while flag:
+            agent_pos_x = random.randint(0,self.map_size-1)
+            agent_pos_y = random.randint(0,self.map_size-1)
+            if self.occupancy[agent_pos_x, agent_pos_y] != 1:
+                flag = 0
+            if agent_pos_x == self.goal1_pos_x and agent_pos_y == self.goal1_pos_y:
+                flag = 0
+
+        self.agt1_pos = [agent_pos_x, agent_pos_y]
+        self.goal1_pos = [self.goal1_pos_x, self.goal1_pos_y]
+        self.occupancy[self.agt1_pos[0]][self.agt1_pos[1]] = 1
+        # 判断起始点所处的区域，以确定后面要用哪一个专家数据
+        # 上半部分是true
+        if agent_pos_x<int((self.map_size - 1) / 2):
+            return True
+        else:
+            return False
 
     def get_state(self):
         state = np.zeros((1, 2))

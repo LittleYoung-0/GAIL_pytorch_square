@@ -74,13 +74,14 @@ class GAIL(object):
             temp = self.int_to_tensor(action_list[i])
             agent_action = torch.cat([agent_action, temp], dim=0)
 
-        expert_state = torch.from_numpy(expert_state_list[0]).float()
+        expert_state = torch.Tensor(expert_state_list).float()
         expert_action = self.int_to_tensor(expert_action_list[0])
         for i in range(1, len(expert_state_list)):
-            temp = torch.from_numpy(expert_state_list[i]).float()
-            expert_state = torch.cat([expert_state, temp], dim=0)
+            # temp = torch.Tensor(expert_state_list[i]).float()
+            # expert_state = torch.cat([expert_state, temp], dim=0)
             temp = self.int_to_tensor(expert_action_list[i])
             expert_action = torch.cat([expert_action, temp], dim=0)
+
 
         agent_label = torch.zeros(len(state_list), 1)
         expert_label = torch.ones(len(expert_state_list), 1)
@@ -89,8 +90,7 @@ class GAIL(object):
         loss = self.advantage_loss(expert_predict, expert_label)
 
         agent_predict = self.discrimnator(agent_state, agent_action)
-        loss = loss + self.advantage_loss(agent_predict, agent_label)    # 这里的loss函数为什么这样计算？
-        # print("Chen SHOW Discriminator LOSS: ", loss)
+        loss = loss + self.advantage_loss(agent_predict, agent_label)    # 这里的loss是生成器和判别器两个loss相加
         # torch网络前向传播：https://blog.csdn.net/scut_salmon/article/details/82414730
         self.d_optimizer.zero_grad()
         loss.backward()
@@ -105,11 +105,19 @@ class GAIL(object):
             temp = self.int_to_tensor(action_list[i])
             agent_action = torch.cat([agent_action, temp], dim=0)
 
-        expert_state = torch.from_numpy(expert_state_list[0]).float()
+        # expert_state = torch.from_numpy(expert_state_list[0]).float()
+        # expert_action = self.int_to_tensor(expert_action_list[0])
+        # for i in range(1, len(expert_state_list)):
+        #     temp = torch.from_numpy(expert_state_list[i]).float()
+        #     expert_state = torch.cat([expert_state, temp], dim=0)
+        #     temp = self.int_to_tensor(expert_action_list[i])
+        #     expert_action = torch.cat([expert_action, temp], dim=0)
+
+        expert_state = torch.Tensor(expert_state_list).float()
         expert_action = self.int_to_tensor(expert_action_list[0])
         for i in range(1, len(expert_state_list)):
-            temp = torch.from_numpy(expert_state_list[i]).float()
-            expert_state = torch.cat([expert_state, temp], dim=0)
+            # temp = torch.Tensor(expert_state_list[i]).float()
+            # expert_state = torch.cat([expert_state, temp], dim=0)
             temp = self.int_to_tensor(expert_action_list[i])
             expert_action = torch.cat([expert_action, temp], dim=0)
 
@@ -120,7 +128,7 @@ class GAIL(object):
         for i in range(len(state_list)):
             agent_loss = agent_loss + fake_reward * action_log_prob_list[i]
         agent_loss = -agent_loss/len(state_list)
-        # print("Chen SHOW Generator LOSS: ", agent_loss)
+
 
         self.g_optimizer.zero_grad()
         agent_loss.backward()
